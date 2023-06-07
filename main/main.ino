@@ -3,6 +3,9 @@
 #include "dac_driver.h"
 #include "serial_interface.h"
 
+//pot wiper pos 20 -> voltage -> 12.8125
+//              40               24.187
+
 /****************************** Fixed Varibles ******************************/
 
 #define RAMP_PIN                A6
@@ -64,11 +67,22 @@ void setup() {
   init_spi(); // Initalize SPI for ext. DAC
 
   Serial.begin(115200); // Begin Serial
-  while(!Serial);
+  //while(!Serial); // Blocks until Serial Connection Establishes
+
+  delay(100); // 1 Second Delay to connect to serial 
 
   Serial.println("Serial Initilized");
-  Serial.println(micros());
-  Serial.println(micros());
+
+  //Serial.println(micros()); // Used for Timing Measurments
+  //Serial.println(micros());
+  
+  Serial.println("Welcome To Your Voltage Ramp");
+  Serial.println("******************************");
+  Serial.println("Available Commands:");
+  Serial.println("******************************");
+  Serial.println("period [period in ms]");
+  Serial.println("pot [digital pot. value (1-127)]");
+  Serial.println(" ");
 
 }
 

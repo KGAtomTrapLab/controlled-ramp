@@ -67,6 +67,7 @@ void dacWrite(uint16_t value)
   digitalWrite(DAC_CS_PIN, LOW);
 
   SPI.transfer16(spiOutput);
+  
 
   digitalWrite(DAC_CS_PIN, HIGH);
 
