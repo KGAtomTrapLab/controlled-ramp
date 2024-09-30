@@ -16,8 +16,8 @@
   MISO: SPI0
   SCK:  SPI0
 
-  CS (DAC:    7
-  CS (POT):   8
+  CS (DAC:    8
+  CS (POT):   7
 
 */
 
@@ -28,9 +28,9 @@
 /****************************** Global Varibles ******************************/
 
 
-const int DAC_CS_PIN = 7;
+const int DAC_CS_PIN = 8;
 
-const int POT_CS_PIN = 8;
+const int POT_CS_PIN = 7;
 
 const uint8_t SPI_CONFIG = 0b01110000; // Config bits for DAC
 
@@ -54,8 +54,10 @@ void init_spi()
 
   SPI.begin();
 
+  // SPISettings settings(20000000, MSBFIRST, SPI_MODE0);
+
   // Delay for initilizatino
-  delay(100);
+  delay(1000);
 
 }
 
@@ -67,7 +69,6 @@ void dacWrite(uint16_t value)
   digitalWrite(DAC_CS_PIN, LOW);
 
   SPI.transfer16(spiOutput);
-  
 
   digitalWrite(DAC_CS_PIN, HIGH);
 
