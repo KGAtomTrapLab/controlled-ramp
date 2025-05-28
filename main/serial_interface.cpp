@@ -14,7 +14,10 @@ void check_for_input()
     if (input.startsWith("help"))                                 // Check for help command
     {
       Serial.println("Available Commands:");
+      Serial.println("******************************");
       Serial.println("period [period in ms]");
+      Serial.println("pot [digital pot. value (1-127)]");
+      Serial.println(" ");
     }
 
     else if (input.startsWith("period"))                          // Check for period command

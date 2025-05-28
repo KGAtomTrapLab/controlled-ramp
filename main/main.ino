@@ -3,11 +3,14 @@
 #include "dac_driver.h"
 #include "serial_interface.h"
 
+//pot wiper pos 20 -> voltage -> 12.8125
+//              40               24.187
+
 /****************************** Fixed Varibles ******************************/
 
-#define RAMP_PIN                A6
-#define PD1_PIN                 A0
-#define PD2_PIN                 A1
+// #define RAMP_PIN                A6
+// #define PD1_PIN                 A0
+// #define PD2_PIN                 A1
 
 #define ANALOG_RESOLUTION       12
 #define MAX_DIGITAL             4095 // 2^(ANALOG_RESOLUTION) - 1
@@ -63,12 +66,23 @@ void setup() {
 
   init_spi(); // Initalize SPI for ext. DAC
 
-  Serial.begin(115200); // Begin Serial
-  while(!Serial);
+  Serial.begin(9600); // Begin Serial
+  //while(!Serial); // Blocks until Serial Connection Establishes
+
+  delay(100); // 1 Second Delay to connect to serial 
 
   Serial.println("Serial Initilized");
-  Serial.println(micros());
-  Serial.println(micros());
+
+  //Serial.println(micros()); // Used for Timing Measurments
+  //Serial.println(micros());
+  
+  // Serial.println("Welcome To Your Voltage Ramp");
+  // Serial.println("******************************");
+  // Serial.println("Available Commands:");
+  // Serial.println("******************************");
+  // Serial.println("period [period in ms]");
+  // Serial.println("pot [digital pot. value (1-127)]");
+  // Serial.println(" ");
 
 }
 
@@ -104,7 +118,7 @@ void inc_output()
 { 
   if (FALL_FLAG) // Count down if we want to ramp down
   {
-    DIGITAL_OUT -= 4;
+    DIGITAL_OUT -= FALL_RATIO_DIV;
 
     if (DIGITAL_OUT <= 0)
     {
