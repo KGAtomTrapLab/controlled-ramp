@@ -17,6 +17,7 @@ void check_for_input()
       Serial.println("******************************");
       Serial.println("period [period in ms]");
       Serial.println("pot [digital pot. value (1-127)]");
+      Serial.println("stat - Returns period and wiper status");
       Serial.println(" ");
     }
 
@@ -57,6 +58,28 @@ void check_for_input()
         Serial.println("Invalid Wiper Position, Range: (0 - 127)");
       }
 
+    }
+
+    // Status: Print the current status of the ramp in a human-readable format
+    else if (input.startsWith("status"))
+    {
+        Serial.println("Ramp Controller Status");
+        Serial.println("**********************");
+        Serial.print("Period(in ms): ");
+        Serial.println(PERIOD);
+        Serial.print("Wiper Position (0-128): ");
+        Serial.println(POT_POSITION);
+    }
+
+    // stat Command: returns current period and wiper position in a machine-readable format
+    else if (input.startsWith("stat"))
+    {
+        // This output lacks readability because it is used by the python interface.
+        // Print period in ms
+        Serial.println(PERIOD);
+
+        // Print pot position
+        Serial.println(POT_POSITION);
     }
 
     else 

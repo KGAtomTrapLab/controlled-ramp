@@ -118,10 +118,12 @@ void inc_output()
 { 
   if (FALL_FLAG) // Count down if we want to ramp down
   {
+    // FALLING MODE
     DIGITAL_OUT -= FALL_RATIO_DIV;
 
     if (DIGITAL_OUT <= 0)
     {
+      // SWITCH TO RISING MODE
       DIGITAL_OUT = 0; // Reset output
 
       FALL_FLAG = false; // Reset falling flag
@@ -129,11 +131,17 @@ void inc_output()
   }
   else // Count up normally
   {
+    // RISING MODE
     DIGITAL_OUT += 1;
     
     if (DIGITAL_OUT >= MAX_DIGITAL)
     {
+      // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down
+      // Send a signal to the computer that the ramp is resetting.
+      // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
+      //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
+      Serial.println("p") // Send a "p" for "peak"
     }
   }
 
