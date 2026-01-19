@@ -141,7 +141,7 @@ void inc_output()
       // Send a signal to the computer that the ramp is resetting.
       // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
       //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      Serial.println("p") // Send a "p" for "peak"
+      Serial.println("p"); // Send a "p" for "peak"
     }
   }
 
