@@ -71,7 +71,7 @@ void setup() {
 
   delay(100); // 1 Second Delay to connect to serial 
 
-  Serial.println("Serial Initilized");
+  Serial.println("Serial Initialized");
 
   //Serial.println(micros()); // Used for Timing Measurments
   //Serial.println(micros());
