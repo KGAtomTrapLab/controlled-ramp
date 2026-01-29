@@ -46,6 +46,11 @@ volatile unsigned long time2 = 0; // used as current time
 
 volatile bool FALL_FLAG = false; 
 
+// The start voltage for the ramp function.
+volatile unsigned long min_voltage = 0;
+// The maximum voltage reached by the ramp
+volatile unsigned long max_voltage = MAX_DIGITAL;
+
 // const int chipSelectPin = 7;
 
 // const uint8_t SPI_CONFIG = 0b01110000;
@@ -121,10 +126,10 @@ void inc_output()
     // FALLING MODE
     DIGITAL_OUT -= FALL_RATIO_DIV;
 
-    if (DIGITAL_OUT <= 0)
+    if (DIGITAL_OUT <= min_voltage)
     {
       // SWITCH TO RISING MODE
-      DIGITAL_OUT = 0; // Reset output
+      DIGITAL_OUT = min_voltage; // Reset output
 
       FALL_FLAG = false; // Reset falling flag
 
@@ -139,7 +144,7 @@ void inc_output()
     // RISING MODE
     DIGITAL_OUT += 1;
     
-    if (DIGITAL_OUT >= MAX_DIGITAL)
+    if (DIGITAL_OUT >= max_voltage)
     {
       // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down

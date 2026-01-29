@@ -82,6 +82,28 @@ void check_for_input()
         Serial.println(POT_POSITION);
     }
 
+    // BOUNDARY SETTING COMMANDS
+    // Set the starting/minimum voltage - number between 0 and 99
+    else if (input.startsWith("min"))
+    {
+
+      input.remove(0, 3); // Remove command from string
+
+      uint8_t newMin = input.toInt();
+
+      if (newMin >= 0 && newMin <= 99) // Check for valid position
+      {
+        set_pot(newMin);
+        Serial.print("New Minimum: ");
+        Serial.println((newMin));
+      }
+      else // Invalid Wiper Position
+      {
+        Serial.println("Invalid Minimum Position, Range: (0 - 99)");
+      }
+
+    }
+
     else 
     {
       Serial.println("Invalid Command");
