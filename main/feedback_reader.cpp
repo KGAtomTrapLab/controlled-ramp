@@ -189,9 +189,9 @@ void print_data_array()
     write_footer();
 }
 
-write_array(uint16_t array_number)
+void write_array(uint16_t array_number)
 {
-    uint16_t * selected_array;
+    int16_t* selected_array;
     if (array_number == 0) selected_array = data_array_0;
     else selected_array = data_array_1;
     for (int i = 0; i < data_array_position; i++)

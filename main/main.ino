@@ -160,7 +160,7 @@ void inc_output()
       // Send a signal to the computer that the ramp is rising.
       // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
       //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      record_valley_position();
+      record_valley_pos();
     }
   }
   else // Count up normally
