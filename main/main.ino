@@ -2,6 +2,7 @@
 #include "global_variables.h"
 #include "dac_driver.h"
 #include "serial_interface.h"
+#include "feedback_reader.h"
 
 //pot wiper pos 20 -> voltage -> 12.8125
 //              40               24.187
@@ -66,7 +67,7 @@ void setup() {
 
   init_spi(); // Initalize SPI for ext. DAC
 
-  Serial.begin(9600); // Begin Serial
+  Serial.begin(9600); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
   //while(!Serial); // Blocks until Serial Connection Establishes
 
   delay(100); // 1 Second Delay to connect to serial 
@@ -87,6 +88,32 @@ void setup() {
 }
 
 /****************************** Loop ******************************/
+/* Control Loop V2.0
+    CURRENT LOOP:
+        1. Take the time
+        2. Await timestep
+        3. Write the ramp position
+        4. Find the next ramp position
+            a. Increment or decrement the position using the divided ratio
+            b. Switch the direction if at/below threshold
+            c. Print a "p" or "v" for peak and valley position - used for syncing
+        5. Record the time that the ramp was set
+        6. Check for input from the Serial line
+
+    PLANNED LOOP:
+        1. Take the time
+        2. Await timestep
+        3. Write the ramp position
+        4. Find the next ramp position
+            a. Increment or decrement the position using the divided ratio
+            b. Switch the direction if at/below threshold
+            c. Collect input from the photodiodes
+            d. Store the input in an array
+            e. When a peak is reached, transfer the collected measurements across serial
+        5. Record the time that the ramp was set
+        6. Check for input from the Serial line
+
+*/
 void loop()
 {
   // Take current time
@@ -116,6 +143,8 @@ void loop()
 // Increments current output and toggles falling flag
 void inc_output()
 { 
+    // Collect photodiode feedback
+    collect_feedback();
   if (FALL_FLAG) // Count down if we want to ramp down
   {
     // FALLING MODE
@@ -131,7 +160,7 @@ void inc_output()
       // Send a signal to the computer that the ramp is rising.
       // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
       //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      Serial.println("v"); // Send a "v" for "valley"
+      record_valley_position();
     }
   }
   else // Count up normally
@@ -144,9 +173,7 @@ void inc_output()
       // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down
       // Send a signal to the computer that the ramp is resetting.
-      // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
-      //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      Serial.println("p"); // Send a "p" for "peak"
+      print_data_array();
     }
   }
 
