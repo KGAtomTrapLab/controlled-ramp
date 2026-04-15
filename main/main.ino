@@ -67,7 +67,7 @@ void setup() {
 
   init_spi(); // Initalize SPI for ext. DAC
 
-  Serial.begin(9600); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
+  Serial.begin(115200); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
   //while(!Serial); // Blocks until Serial Connection Establishes
 
   delay(100); // 1 Second Delay to connect to serial 

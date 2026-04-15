@@ -159,13 +159,24 @@ void collect_feedback()
     data_array_1[data_array_position] = channel_1;
     // Increment position
     data_array_position++;
-
+    if (data_array_position >= 4096) data_array_position = 0;
 }
 
 // Record the valley position
 void record_valley_pos()
 {
     valley_position = data_array_position;
+}
+
+void write_array(uint16_t array_number)
+{
+    int16_t* selected_array;
+    if (array_number == 0) selected_array = data_array_0;
+    else selected_array = data_array_1;
+    for (int i = 0; i < data_array_position; i++)
+    {
+        write_short(selected_array[i]);
+    }
 }
 
 /* Print the data array to the serial terminal.
@@ -186,16 +197,11 @@ void print_data_array()
 
     write_short(valley_position);
 
+    write_array(0);
+
     write_footer();
+
+    data_array_position = 0;
 }
 
-void write_array(uint16_t array_number)
-{
-    int16_t* selected_array;
-    if (array_number == 0) selected_array = data_array_0;
-    else selected_array = data_array_1;
-    for (int i = 0; i < data_array_position; i++)
-    {
-        write_short(selected_array[i]);
-    }
-}
+
