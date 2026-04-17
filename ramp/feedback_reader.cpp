@@ -6,8 +6,8 @@
 
 
 // Dedicated pins for talking to the ADCs - set these based on the connected pin on the board
-int adc_1_cs_pin = 10;
-int adc_2_cs_pin = 11;
+int adc_1_cs_pin = 50;
+int adc_2_cs_pin = 52;
 
 // Channel mode: 1 for single channel, 2 for dual channel
 int channel_mode = 2;
@@ -16,8 +16,8 @@ int channel_mode = 2;
 // Position within the arrays
 int16_t data_array_position = 0;
 
-int16_t data_array_0[4096];
-int16_t data_array_1[4096];
+int16_t data_array_0[5000];
+int16_t data_array_1[5000];
 
 int16_t valley_position = 0;
 
@@ -29,9 +29,8 @@ void reader_setup() {
   digitalWrite(adc_1_cs_pin, HIGH);
   pinMode(adc_2_cs_pin, OUTPUT);
   digitalWrite(adc_2_cs_pin, HIGH);
-  SPI.begin();
-  SPI.setClockDivider(12); // Adjust as needed for stability
-  SPI.setDataMode(SPI_MODE1);
+//   SPI.begin();
+//   SPI.setClockDivider(12); // Adjust as needed for stability
   SPI.setBitOrder(MSBFIRST);
   
   delay(1000);
@@ -57,7 +56,8 @@ uint16_t read_adc(int cs_pin)
   result = null_to_5;
   result = result << 4;
   result |= bit4_to_0 >> 4;
-
+    // Serial.print("a:");
+    // Serial.println(result);
   return result;
 }
 
@@ -159,7 +159,6 @@ void collect_feedback()
     data_array_1[data_array_position] = channel_1;
     // Increment position
     data_array_position++;
-    if (data_array_position >= 4096) data_array_position = 0;
 }
 
 // Record the valley position
@@ -182,8 +181,6 @@ void write_array(uint16_t array_number)
 /* Print the data array to the serial terminal.
     FORMAT: 
         HEADER 0xCC for single channel, 0xCD for dual channel
-        16 bit length of each array
-        16 bit position of the valley point
         length x 16 bit signed values for channel 0
         if dual channel, length x 16 bit signed values for channel 1
         FOOTER 0xCB
@@ -195,9 +192,9 @@ void print_data_array()
     // Write length of array
     write_short(data_array_position);
 
-    write_short(valley_position);
 
     write_array(0);
+    write_array(1);
 
     write_footer();
 

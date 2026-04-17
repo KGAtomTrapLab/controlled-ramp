@@ -66,6 +66,7 @@ void setup() {
   calc_time_step(); // Calculate initial time step
 
   init_spi(); // Initalize SPI for ext. DAC
+  reader_setup();
 
   Serial.begin(115200); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
   //while(!Serial); // Blocks until Serial Connection Establishes
@@ -143,8 +144,6 @@ void loop()
 // Increments current output and toggles falling flag
 void inc_output()
 { 
-    // Collect photodiode feedback
-    collect_feedback();
   if (FALL_FLAG) // Count down if we want to ramp down
   {
     // FALLING MODE
@@ -157,14 +156,12 @@ void inc_output()
 
       FALL_FLAG = false; // Reset falling flag
 
-      // Send a signal to the computer that the ramp is rising.
-      // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
-      //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      record_valley_pos();
     }
   }
   else // Count up normally
   {
+    // Collect photodiode feedback - only on rising edge
+    collect_feedback();
     // RISING MODE
     DIGITAL_OUT += 1;
     
