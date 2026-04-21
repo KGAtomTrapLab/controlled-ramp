@@ -148,6 +148,7 @@ void output_data()
 // Collect the Photodiode feedback, and append to the array
 void collect_feedback()
 {
+    if (data_array_position >= 4096) return;
     // Read from PD 0
     int16_t channel_0 = get_data_dual_channel(0);
 
