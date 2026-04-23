@@ -165,7 +165,7 @@ void inc_output()
   else // Count up normally
   {
     // Collect photodiode feedback - only on rising edge
-    collect_feedback();
+    // collect_feedback();
     // RISING MODE
     DIGITAL_OUT += 1;
     
@@ -174,7 +174,7 @@ void inc_output()
       // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down
       // Send a signal to the computer that the ramp is resetting.
-      print_data_array();
+      // print_data_array();
     }
   }
 
