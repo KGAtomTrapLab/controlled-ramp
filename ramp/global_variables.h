@@ -14,4 +14,7 @@ void calc_time_step();
 
 void set_pot(uint8_t position);
 
+void set_ramp_start(int position);
+void set_ramp_end(int position);
+
 #endif /* _GLOBAL_VARIABLES_H */

@@ -47,6 +47,10 @@ volatile unsigned long time2 = 0; // used as current time
 
 volatile bool FALL_FLAG = false; 
 
+volatile int MAX_RAMP = MAX_VOLTAGE; // Maximum ramp point
+
+volatile int MIN_RAMP = 0;           // Minimum ramp point
+
 // const int chipSelectPin = 7;
 
 // const uint8_t SPI_CONFIG = 0b01110000;
@@ -149,7 +153,7 @@ void inc_output()
     // FALLING MODE
     DIGITAL_OUT -= FALL_RATIO_DIV;
 
-    if (DIGITAL_OUT <= 0)
+    if (DIGITAL_OUT <= MIN_RAMP)
     {
       // SWITCH TO RISING MODE
       DIGITAL_OUT = 0; // Reset output
@@ -165,7 +169,7 @@ void inc_output()
     // RISING MODE
     DIGITAL_OUT += 1;
     
-    if (DIGITAL_OUT >= MAX_DIGITAL)
+    if (DIGITAL_OUT >= MAX_RAMP)
     {
       // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down
@@ -196,4 +200,14 @@ void set_pot(uint8_t position)
 
   potWrite(POT_POSITION); // might be redundent but want to keep track of position globally
 
+}
+
+void set_ramp_start(int position)
+{
+    MAX_RAMP = position;
+}
+
+void set_ramp_end(int position)
+{
+    MIN_RAMP = position;
 }
