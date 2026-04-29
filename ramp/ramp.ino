@@ -47,7 +47,7 @@ volatile unsigned long time2 = 0; // used as current time
 
 volatile bool FALL_FLAG = false; 
 
-volatile int MAX_RAMP = MAX_VOLTAGE; // Maximum ramp point
+volatile int MAX_RAMP = MAX_DIGITAL; // Maximum ramp point
 
 volatile int MIN_RAMP = 0;           // Minimum ramp point
 
@@ -156,7 +156,7 @@ void inc_output()
     if (DIGITAL_OUT <= MIN_RAMP)
     {
       // SWITCH TO RISING MODE
-      DIGITAL_OUT = 0; // Reset output
+      DIGITAL_OUT = MIN_RAMP; // Reset output
 
       FALL_FLAG = false; // Reset falling flag
       // Send a signal to the computer that the ramp is resetting.
@@ -203,10 +203,10 @@ void set_pot(uint8_t position)
 
 void set_ramp_start(int position)
 {
-    MAX_RAMP = position;
+    MIN_RAMP = position;
 }
 
 void set_ramp_end(int position)
 {
-    MIN_RAMP = position;
+    MAX_RAMP = position;
 }
