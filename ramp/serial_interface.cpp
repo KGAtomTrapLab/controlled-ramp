@@ -18,8 +18,8 @@ void check_for_input()
       Serial.println("period [period in ms]");
       Serial.println("pot [digital pot. value (1-127)]");
       Serial.println("stat - Returns period and wiper status");
-      Serial.println("rampstart [ramp value (0-4096)] - Set the starting level of the ramp")
-      Serial.println("rampend [ramp value (0-4096)] - Set the ending level of the ramp")
+      Serial.println("rampstart [ramp value (0-4096)] - Set the starting level of the ramp");
+      Serial.println("rampend [ramp value (0-4096)] - Set the ending level of the ramp");
       Serial.println(" ");
     }
 
