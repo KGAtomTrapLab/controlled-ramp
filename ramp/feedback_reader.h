@@ -3,8 +3,6 @@
 
 void collect_feedback();
 
-void record_valley_pos();
-
 void print_data_array();
 
 void reader_setup();

@@ -120,34 +120,12 @@ void write_short(int16_t input_value)
     Serial.write((uint8_t *)&input_value, sizeof(int16_t));
 }
 
-void output_data()
-{
-    /*
-        Surround the value in a 0xCC and a 0xCB to make sure any mismatch does not occur.
-    */
-
-    // Make a buffer for the values:
-    // First place the head character, then the first byte of the value, then the last byte of the value, then finally the tail signal
-    write_header();
-    if (channel_mode == 1)
-    {
-        write_short(get_data_single_channel());
-    }
-    // Print the dual channel value
-    if (channel_mode == 2)
-    {
-        int16_t channel_0 = get_data_dual_channel(0);
-        int16_t channel_1 = get_data_dual_channel(1);
-        write_short(channel_0);
-        write_short(channel_1);
-    }
-
-    write_footer();
-}
-
 // Collect the Photodiode feedback, and append to the array
 void collect_feedback()
 {
+    // Safety code to prevent writing outside of the array.
+    // If the code is working perfectly, this will never be true,
+    // But it verifies correct writing of data.
     if (data_array_position >= 4096) return;
     // Read from PD 0
     int16_t channel_0 = get_data_dual_channel(0);
@@ -160,12 +138,6 @@ void collect_feedback()
     data_array_1[data_array_position] = channel_1;
     // Increment position
     data_array_position++;
-}
-
-// Record the valley position
-void record_valley_pos()
-{
-    valley_position = data_array_position;
 }
 
 void write_array(uint16_t array_number)
