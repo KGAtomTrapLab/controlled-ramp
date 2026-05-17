@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "global_variables.h"
+#include "ramp.h"
 
 // Checks the serial monitor for input commands
 void check_for_input()

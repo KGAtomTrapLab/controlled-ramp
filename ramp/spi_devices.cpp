@@ -1,34 +1,86 @@
-#include <SPI.h>
+//#include "pins_arduino.h"
 #include <Arduino.h>
+#include <SPI.h>
+#include "spi_devices.h"
+#include "ramp.h"
 
+/****************************** Fixed Varibles ******************************/
+const int DAC_CS_PIN = 8;
 
-/****************************** Global Varibles ******************************/
+const int POT_CS_PIN = 7;
 
+const uint8_t SPI_CONFIG = 0b01110000; // Config bits for DAC
 
 // Dedicated pins for talking to the ADCs - set these based on the connected pin on the board
 int adc_1_cs_pin = 50;
 int adc_2_cs_pin = 52;
 
-// Channel mode: 1 for single channel, 2 for dual channel
-int channel_mode = 2;
-
 // Arrays for storing photodiode data
-// Position within the arrays
-int16_t data_array_position = 0;
 
 int16_t data_array_0[5000];
 int16_t data_array_1[5000];
 
-int16_t valley_position = 0;
-
 /****************************** Functions ******************************/
 
-void reader_setup() {
-  // Initialize the SPI
+// Initalize SPI conneciton
+void init_spi()
+{
+  // Initalize I/O
+  pinMode(DAC_CS_PIN, OUTPUT);
+
+  pinMode(POT_CS_PIN, OUTPUT);
+
+  // Start DAC Chip Select HIGH
+  digitalWrite(DAC_CS_PIN, HIGH);
+
+  // Start POT Chip Select HIGH
+  digitalWrite(POT_CS_PIN, HIGH);
+
+  // Setup for ADCs
   pinMode(adc_1_cs_pin, OUTPUT);
   digitalWrite(adc_1_cs_pin, HIGH);
   pinMode(adc_2_cs_pin, OUTPUT);
   digitalWrite(adc_2_cs_pin, HIGH);
+
+  SPI.begin();
+
+  // SPISettings settings(20000000, MSBFIRST, SPI_MODE0);
+
+  // Delay for initilizatino
+  delay(1000);
+
+}
+
+// Outputs a 12 bit int to the external DAC via SPI
+void dacWrite(uint16_t value)
+{
+  uint16_t spiOutput = (SPI_CONFIG << 8) | value;
+
+  digitalWrite(DAC_CS_PIN, LOW);
+
+  SPI.transfer16(spiOutput);
+
+  digitalWrite(DAC_CS_PIN, HIGH);
+
+}
+
+void potWrite(uint8_t position)
+{
+  uint16_t command = (0x00 << 8) | position; // Command byte (0x00) and data byte (position)
+
+  digitalWrite(POT_CS_PIN, LOW);
+
+  SPI.transfer16(command);
+
+  digitalWrite(POT_CS_PIN, HIGH);
+
+}
+
+/****************************** PHOTODIODE READER FUNCTIONS ******************************/
+
+void reader_setup() {
+  // Initialize the SPI
+
 //   SPI.begin();
 //   SPI.setClockDivider(12); // Adjust as needed for stability
   SPI.setBitOrder(MSBFIRST);
@@ -56,29 +108,7 @@ uint16_t read_adc(int cs_pin)
   result = null_to_5;
   result = result << 4;
   result |= bit4_to_0 >> 4;
-    // Serial.print("a:");
-    // Serial.println(result);
   return result;
-}
-
-int16_t get_data_single_channel()
-{
-    /*
-        Gather the data from the ADCs and prepare a combined value to send.
-
-        Takes both values, inverts the second value, and adds them together.
-    
-    */
-    // Read both values, converting them into signed integers.
-    int16_t adc_1_value = (int16_t) read_adc(adc_1_cs_pin);
-    int16_t adc_2_value = (int16_t) read_adc(adc_2_cs_pin);
-
-    // Flip the second one, add them together
-    int16_t added_value = adc_1_value - adc_2_value;
-    // Serial.print("a:");
-    // Serial.println(added_value);
-
-    return added_value;
 }
 
 int16_t get_data_dual_channel(uint8_t chnl)
@@ -97,23 +127,23 @@ int16_t get_data_dual_channel(uint8_t chnl)
         return 0;
 }
 
-void write_header()
-{
-    /*
-        Write the header to indicate data is coming next
-    */
-    uint8_t header = 0xCC;
-    Serial.write(&header, sizeof(uint8_t));
-}
+// void write_header()
+// {
+//     /*
+//         Write the header to indicate data is coming next
+//     */
+//     uint8_t header = 0xCC;
+//     Serial.write(&header, sizeof(uint8_t));
+// }
 
-void write_footer()
-{
-    /*
-        Write the header to indicate data is coming next
-    */
-    uint8_t footer = 0xCB;
-    Serial.write(&footer, sizeof(uint8_t));
-}
+// void write_footer()
+// {
+//     /*
+//         Write the header to indicate data is coming next
+//     */
+//     uint8_t footer = 0xCB;
+//     Serial.write(&footer, sizeof(uint8_t));
+// }
 
 void write_short(int16_t input_value)
 {
@@ -161,7 +191,6 @@ void write_array(uint16_t array_number)
 */
 void print_data_array()
 {
-    write_header();
     // Write length of array
     write_short(data_array_position);
 
@@ -169,9 +198,8 @@ void print_data_array()
     write_array(0);
     write_array(1);
 
-    write_footer();
-
     data_array_position = 0;
 }
+
 
 

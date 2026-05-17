@@ -1,5 +1,5 @@
-#ifndef _GLOBAL_VARIABLES_H
-#define _GLOBAL_VARIABLES_H
+#ifndef _RAMP_H
+#define _RAMP_H
 
 // Varibles and functions used across multiple files relating to global Varibles
 // Definitions in main file
@@ -17,4 +17,7 @@ void set_pot(uint8_t position);
 void set_ramp_start(int position);
 void set_ramp_end(int position);
 
-#endif /* _GLOBAL_VARIABLES_H */
+// Position within the arrays
+int16_t data_array_position = 0;
+
+#endif /* _RAMP_H */

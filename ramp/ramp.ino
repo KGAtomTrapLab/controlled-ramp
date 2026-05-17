@@ -1,8 +1,7 @@
 #include <Arduino.h>
-#include "global_variables.h"
-#include "dac_driver.h"
-#include "serial_interface.h"
-#include "feedback_reader.h"
+#include "ramp.h"
+#include "spi_devices.h"
+#include "usb_interface.h"
 
 //pot wiper pos 20 -> voltage -> 12.8125
 //              40               24.187
@@ -75,7 +74,7 @@ void setup() {
   Serial.begin(115200); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
   //while(!Serial); // Blocks until Serial Connection Establishes
 
-  delay(100); // 1 Second Delay to connect to serial 
+  delay(1000); // 1 Second Delay to connect to serial 
 
   Serial.println("Serial Initialized");
 
@@ -134,12 +133,7 @@ void loop()
 
     // set new output time
     time1 = time2; 
-
   }
-  //Serial.println(time1);
-
-  check_for_input();
-
 }
 
 /****************************** Function Definitions ******************************/
@@ -155,12 +149,12 @@ void inc_output()
 
     if (DIGITAL_OUT <= MIN_RAMP)
     {
-      // SWITCH TO RISING MODE
-      DIGITAL_OUT = MIN_RAMP; // Reset output
+        // SWITCH TO RISING MODE
+        DIGITAL_OUT = MIN_RAMP; // Reset output
 
-      FALL_FLAG = false; // Reset falling flag
-      // Send a signal to the computer that the ramp is resetting.
-      print_data_array();
+        FALL_FLAG = false; // Reset falling flag
+        check_for_input();
+        data_array_position = 0;
     }
   }
   else // Count up normally
@@ -185,7 +179,7 @@ void calc_time_step()
   timeStep = (PERIOD * 1000) / MAX_DIGITAL;
 }
 
-// Takes a voltage in mV and outputs a corrisponding digital value to the DAC via SPI
+// Takes a voltage in mV and outputs a corresponding digital value to the DAC via SPI
 void output_voltage(unsigned int voltage)
 {
   unsigned int output = map(voltage, MIN_VOLTAGE, MAX_VOLTAGE, 0, MAX_DIGITAL);
