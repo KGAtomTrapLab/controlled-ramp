@@ -168,6 +168,8 @@ void collect_feedback()
     data_array_1[data_array_position] = channel_1;
     // Increment position
     data_array_position++;
+
+
 }
 
 void write_array(uint16_t array_number)
@@ -198,7 +200,6 @@ void print_data_array()
     write_array(0);
     write_array(1);
 
-    data_array_position = 0;
 }
 
 

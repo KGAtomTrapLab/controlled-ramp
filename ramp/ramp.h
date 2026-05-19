@@ -18,6 +18,6 @@ void set_ramp_start(int position);
 void set_ramp_end(int position);
 
 // Position within the arrays
-int16_t data_array_position = 0;
+volatile extern int16_t data_array_position;
 
 #endif /* _RAMP_H */

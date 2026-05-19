@@ -51,7 +51,7 @@ volatile int MAX_RAMP = MAX_DIGITAL; // Maximum ramp point
 volatile int MIN_RAMP = 0;           // Minimum ramp point
 
 // const int chipSelectPin = 7;
-
+volatile int16_t data_array_position = 0;
 // const uint8_t SPI_CONFIG = 0b01110000;
 
 
@@ -144,6 +144,7 @@ void inc_output()
 { 
   if (FALL_FLAG) // Count down if we want to ramp down
   {
+    // Serial.println("Falling");
     // FALLING MODE
     DIGITAL_OUT -= FALL_RATIO_DIV;
 
@@ -153,6 +154,7 @@ void inc_output()
         DIGITAL_OUT = MIN_RAMP; // Reset output
 
         FALL_FLAG = false; // Reset falling flag
+        // Check for input at the end of each period
         check_for_input();
         data_array_position = 0;
     }

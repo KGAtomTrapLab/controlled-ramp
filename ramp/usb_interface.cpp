@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "ramp.h"
+#include "spi_devices.h"
 
 // Checks the serial monitor for input commands
 void check_for_input()
@@ -20,6 +21,7 @@ void check_for_input()
       Serial.println("stat - Returns period and wiper status");
       Serial.println("rampstart [ramp value (0-4096)] - Set the starting level of the ramp");
       Serial.println("rampend [ramp value (0-4096)] - Set the ending level of the ramp");
+      Serial.println("read - Read the recorded feedback data - set of 16-bit ints");
       Serial.println(" ");
     }
 
@@ -104,6 +106,11 @@ void check_for_input()
         {
             set_ramp_end(newPosition);
         }
+    }
+
+    else if (input.startsWith("read"))
+    {
+      print_data_array();
     }
 
     else 
