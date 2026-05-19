@@ -12,6 +12,4 @@ void collect_feedback();
 
 void print_data_array();
 
-void reader_setup();
-
 #endif /* _SPI_DEVICES_H */

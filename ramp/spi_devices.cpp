@@ -12,8 +12,8 @@ const int POT_CS_PIN = 7;
 const uint8_t SPI_CONFIG = 0b01110000; // Config bits for DAC
 
 // Dedicated pins for talking to the ADCs - set these based on the connected pin on the board
-int adc_1_cs_pin = 50;
-int adc_2_cs_pin = 52;
+int adc_1_cs_pin = 48;
+int adc_2_cs_pin = 50;
 
 // Arrays for storing photodiode data
 
@@ -43,8 +43,6 @@ void init_spi()
   digitalWrite(adc_2_cs_pin, HIGH);
 
   SPI.begin();
-
-  // SPISettings settings(20000000, MSBFIRST, SPI_MODE0);
 
   // Delay for initilizatino
   delay(1000);
@@ -78,37 +76,29 @@ void potWrite(uint8_t position)
 
 /****************************** PHOTODIODE READER FUNCTIONS ******************************/
 
-void reader_setup() {
-  // Initialize the SPI
-
-//   SPI.begin();
-//   SPI.setClockDivider(12); // Adjust as needed for stability
-  SPI.setBitOrder(MSBFIRST);
-  
-  delay(1000);
-}
-
 /* Read from the ADC. sends 12 bits.
  *  TODO: Is the null bit included?
  */
 uint16_t read_adc(int cs_pin)
 {
-  // Want to send 0x80:
-  // Start, Pseudo-Differential, Sign, Most Significant Bit First
-  digitalWrite(cs_pin, LOW);
-  SPI.transfer(0x08);
-  uint8_t null_to_5 = SPI.transfer(0x00);
-  uint8_t bit4_to_0 = SPI.transfer(0x00);
 
-  // Disable the ADC
-  digitalWrite(cs_pin, HIGH);
+    digitalWrite(cs_pin, LOW);
 
-  // Processing the information we received
-  uint16_t result = 0x0;
-  result = null_to_5;
-  result = result << 4;
-  result |= bit4_to_0 >> 4;
-  return result;
+    uint8_t b0 = SPI.transfer(0x01);                  
+    uint8_t b1 = SPI.transfer(0x80);                  
+    uint8_t b2 = SPI.transfer(0x00);      
+
+    // Serial.println("Begin");
+    // Serial.println(b1 & 0X0F);
+    // Serial.println(b2);            
+
+    uint16_t result = ((b1 & 0x0F) << 8) | b2;
+
+    // Serial.println(result);
+
+    digitalWrite(cs_pin, HIGH);
+
+    return result;
 }
 
 int16_t get_data_dual_channel(uint8_t chnl)
@@ -127,24 +117,6 @@ int16_t get_data_dual_channel(uint8_t chnl)
         return 0;
 }
 
-// void write_header()
-// {
-//     /*
-//         Write the header to indicate data is coming next
-//     */
-//     uint8_t header = 0xCC;
-//     Serial.write(&header, sizeof(uint8_t));
-// }
-
-// void write_footer()
-// {
-//     /*
-//         Write the header to indicate data is coming next
-//     */
-//     uint8_t footer = 0xCB;
-//     Serial.write(&footer, sizeof(uint8_t));
-// }
-
 void write_short(int16_t input_value)
 {
     Serial.write((uint8_t *)&input_value, sizeof(int16_t));
@@ -159,16 +131,17 @@ void collect_feedback()
     if (data_array_position >= 4096) return;
     // Read from PD 0
     int16_t channel_0 = get_data_dual_channel(0);
+    // Serial.println(channel_0);
 
     // Read from PD 1
     int16_t channel_1 = get_data_dual_channel(1);
+    // Serial.println(channel_1);
 
     // Store
     data_array_0[data_array_position] = channel_0;
     data_array_1[data_array_position] = channel_1;
     // Increment position
     data_array_position++;
-
 
 }
 
