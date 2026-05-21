@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "global_variables.h"
-#include "dac_driver.h"
-#include "serial_interface.h"
+#include "ramp.h"
+#include "spi_devices.h"
+#include "usb_interface.h"
 
 //pot wiper pos 20 -> voltage -> 12.8125
 //              40               24.187
@@ -46,8 +46,12 @@ volatile unsigned long time2 = 0; // used as current time
 
 volatile bool FALL_FLAG = false; 
 
-// const int chipSelectPin = 7;
+volatile int MAX_RAMP = MAX_DIGITAL; // Maximum ramp point
 
+volatile int MIN_RAMP = 0;           // Minimum ramp point
+
+// const int chipSelectPin = 7;
+volatile int16_t data_array_position = 0;
 // const uint8_t SPI_CONFIG = 0b01110000;
 
 
@@ -66,10 +70,10 @@ void setup() {
 
   init_spi(); // Initalize SPI for ext. DAC
 
-  Serial.begin(9600); // Begin Serial
+  Serial.begin(115200); // Begin Serial - TODO: Change this to a different rate? The previous DAVLL code used a baud rate of 115200
   //while(!Serial); // Blocks until Serial Connection Establishes
 
-  delay(100); // 1 Second Delay to connect to serial 
+  delay(1000); // 1 Second Delay to connect to serial 
 
   Serial.println("Serial Initialized");
 
@@ -87,6 +91,32 @@ void setup() {
 }
 
 /****************************** Loop ******************************/
+/* Control Loop V2.0
+    CURRENT LOOP:
+        1. Take the time
+        2. Await timestep
+        3. Write the ramp position
+        4. Find the next ramp position
+            a. Increment or decrement the position using the divided ratio
+            b. Switch the direction if at/below threshold
+            c. Print a "p" or "v" for peak and valley position - used for syncing
+        5. Record the time that the ramp was set
+        6. Check for input from the Serial line
+
+    PLANNED LOOP:
+        1. Take the time
+        2. Await timestep
+        3. Write the ramp position
+        4. Find the next ramp position
+            a. Increment or decrement the position using the divided ratio
+            b. Switch the direction if at/below threshold
+            c. Collect input from the photodiodes
+            d. Store the input in an array
+            e. When a peak is reached, transfer the collected measurements across serial
+        5. Record the time that the ramp was set
+        6. Check for input from the Serial line
+
+*/
 void loop()
 {
   // Take current time
@@ -102,12 +132,7 @@ void loop()
 
     // set new output time
     time1 = time2; 
-
   }
-  //Serial.println(time1);
-
-  check_for_input();
-
 }
 
 /****************************** Function Definitions ******************************/
@@ -118,35 +143,32 @@ void inc_output()
 { 
   if (FALL_FLAG) // Count down if we want to ramp down
   {
+    // Serial.println("Falling");
     // FALLING MODE
     DIGITAL_OUT -= FALL_RATIO_DIV;
 
-    if (DIGITAL_OUT <= 0)
+    if (DIGITAL_OUT <= MIN_RAMP)
     {
-      // SWITCH TO RISING MODE
-      DIGITAL_OUT = 0; // Reset output
+        // SWITCH TO RISING MODE
+        DIGITAL_OUT = MIN_RAMP; // Reset output
 
-      FALL_FLAG = false; // Reset falling flag
-
-      // Send a signal to the computer that the ramp is rising.
-      // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
-      //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      Serial.println("v"); // Send a "v" for "valley"
+        FALL_FLAG = false; // Reset falling flag
+        // Check for input at the end of each period
+        check_for_input();
+        data_array_position = 0;
     }
   }
   else // Count up normally
   {
+    // Collect photodiode feedback - only on rising edge
+    collect_feedback();
     // RISING MODE
     DIGITAL_OUT += 1;
     
-    if (DIGITAL_OUT >= MAX_DIGITAL)
+    if (DIGITAL_OUT >= MAX_RAMP)
     {
       // SWITCH TO FALLING MODE
       FALL_FLAG = true; // Toggle falling flag to ramp down
-      // Send a signal to the computer that the ramp is resetting.
-      // NOTE: Depending on the execution of this project, this may be a temporary piece of code.
-      //    If the Ramp math is done within the arduino(which it probably should be) this isn't necessary.
-      Serial.println("p"); // Send a "p" for "peak"
     }
   }
 
@@ -158,7 +180,7 @@ void calc_time_step()
   timeStep = (PERIOD * 1000) / MAX_DIGITAL;
 }
 
-// Takes a voltage in mV and outputs a corrisponding digital value to the DAC via SPI
+// Takes a voltage in mV and outputs a corresponding digital value to the DAC via SPI
 void output_voltage(unsigned int voltage)
 {
   unsigned int output = map(voltage, MIN_VOLTAGE, MAX_VOLTAGE, 0, MAX_DIGITAL);
@@ -172,4 +194,14 @@ void set_pot(uint8_t position)
 
   potWrite(POT_POSITION); // might be redundent but want to keep track of position globally
 
+}
+
+void set_ramp_start(int position)
+{
+    MIN_RAMP = position;
+}
+
+void set_ramp_end(int position)
+{
+    MAX_RAMP = position;
 }
